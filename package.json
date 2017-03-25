@@ -1,6 +1,6 @@
 {
   "name": "mobx-rest-fetch-adapter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "fetch adapter for mobx-rest",
   "repository": {
     "type": "git",
@@ -18,9 +18,7 @@
       "beforeEach",
       "expect",
       "Class",
-      "jest",
-      "FormData",
-      "File"
+      "jest"
     ]
   },
   "devDependencies": {
@@ -31,7 +29,6 @@
     "babel-plugin-transform-flow-strip-types": "^6.8.0",
     "babel-polyfill": "^6.9.1",
     "babel-preset-es2015": "^6.3.13",
-    "babel-preset-stage-1": "^6.5.0",
     "babel-register": "^6.9.0",
     "flow-bin": "^0.38.0",
     "jest": "^18.1.0",
