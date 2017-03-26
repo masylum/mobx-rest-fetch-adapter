@@ -1,38 +1,29 @@
 import adapter from '../src'
+global.fetch = require('jest-fetch-mock')
 
 adapter.apiPath = '/api'
 
-const noop = () => {}
-
-const injectDone = (values) => {
-  fetch = jest.genMockFunction().mockImplementation((url, options) => {
-    return {
-      done: (cb) => {
-        cb(values)
-        return { fail: noop }
-      }
-    }
-  })
+let ret
+function lastRequest () {
+  const mock = global.fetch.mock
+  return mock.calls[mock.calls.length - 1][0]
 }
 
-const injectFail = (values) => {
-  fetch = jest.genMockFunction().mockImplementation((url, options) => {
-    return {
-      done: () => {
-        return {
-          fail: (cb) => {
-            cb({ responseText: values })
-          }
-        }
-      }
-    }
-  })
+function injectDone (values) {
+  global.fetch.mockResponseOnce(
+    JSON.stringify(values), { status: 200 }
+  )
+}
+
+function injectFail (values) {
+  global.fetch.mockResponseOnce(
+    JSON.stringify(values), { status: 422 }
+  )
 }
 
 describe('adapter', () => {
   describe('ajax', () => {
     describe('when it fails with a malformed response', () => {
-      let ret
       const values = 'ERROR'
 
       beforeEach(() => {
@@ -51,7 +42,6 @@ describe('adapter', () => {
   })
 
   describe('get', () => {
-    let ret
     const data = { manager_id: 2 }
 
     const action = () => {
@@ -71,8 +61,9 @@ describe('adapter', () => {
 
         return ret.promise.then((vals) => {
           expect(vals).toEqual(values)
-          expect(fetch.mock.calls[0][0]).toBe('/api/users')
-          expect(fetch.mock.calls[0][1]).toEqual({ data })
+          expect(lastRequest().url).toBe('/api/users?manager_id=2')
+          expect(lastRequest().method).toBe('GET')
+          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
         })
       })
     })
@@ -96,7 +87,6 @@ describe('adapter', () => {
   })
 
   describe('post', () => {
-    let ret
     let data
 
     const action = () => {
@@ -117,12 +107,10 @@ describe('adapter', () => {
 
         return ret.promise.then((vals) => {
           expect(vals).toEqual(values)
-          expect(fetch.mock.calls[0][0]).toBe('/api/users')
-          expect(fetch.mock.calls[0][1]).toEqual({
-            method: 'POST',
-            contentType: 'application/json',
-            data: '{"name":"paco"}'
-          })
+          expect(lastRequest().url).toBe('/api/users')
+          expect(lastRequest().method).toBe('POST')
+          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
+          expect(lastRequest()._bodyInit).toBe('{"name":"paco"}')
         })
       })
     })
@@ -144,37 +132,9 @@ describe('adapter', () => {
         })
       })
     })
-
-    describe('when it contains a file', () => {
-      const values = { id: 1, avatar: 'lol.png' }
-
-      beforeEach(() => {
-        data = { avatar: new File([''], 'filename') }
-        injectDone(values)
-        action()
-      })
-
-      it('sends a xhr request with data parameters', () => {
-        expect(ret.abort).toBeTruthy()
-
-        return ret.promise.then((vals) => {
-          const res = fetch.mock.calls[0][1]
-
-          expect(vals).toEqual(values)
-          expect(fetch.mock.calls[0][0]).toBe('/api/users')
-          expect(res.cache).toBe(false)
-          expect(res.contentType).toBe(false)
-          expect(res.data).toBeTruthy()
-          expect(res.method).toBe('POST')
-          expect(res.processData).toBe(false)
-          expect(res.xhr).toBeTruthy()
-        })
-      })
-    })
   })
 
   describe('put', () => {
-    let ret
     const data = { name: 'paco' }
 
     const action = () => {
@@ -194,12 +154,10 @@ describe('adapter', () => {
 
         return ret.promise.then((vals) => {
           expect(vals).toEqual(values)
-          expect(fetch.mock.calls[0][0]).toBe('/api/users')
-          expect(fetch.mock.calls[0][1]).toEqual({
-            method: 'PUT',
-            contentType: 'application/json',
-            data: '{"name":"paco"}'
-          })
+          expect(lastRequest().url).toBe('/api/users')
+          expect(lastRequest().method).toBe('PUT')
+          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
+          expect(lastRequest()._bodyInit).toBe('{"name":"paco"}')
         })
       })
     })
@@ -223,8 +181,6 @@ describe('adapter', () => {
   })
 
   describe('del', () => {
-    let ret
-
     const action = () => {
       ret = adapter.del('/users')
     }
@@ -242,12 +198,9 @@ describe('adapter', () => {
 
         return ret.promise.then((vals) => {
           expect(vals).toEqual(values)
-          expect(fetch.mock.calls[0][0]).toBe('/api/users')
-          expect(fetch.mock.calls[0][1]).toEqual({
-            method: 'DELETE',
-            contentType: 'application/json',
-            data: null
-          })
+          expect(lastRequest().url).toEqual('/api/users')
+          expect(lastRequest().method).toBe('DELETE')
+          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
         })
       })
     })

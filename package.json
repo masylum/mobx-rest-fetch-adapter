@@ -32,6 +32,7 @@
     "babel-register": "^6.9.0",
     "flow-bin": "^0.38.0",
     "jest": "^18.1.0",
+    "jest-fetch-mock": "^1.0.8",
     "snazzy": "^6.0.0",
     "standard": "^8.6.0"
   },
@@ -43,5 +44,8 @@
     "lint": "standard --verbose | snazzy",
     "flow": "flow",
     "test": "npm run flow && npm run lint && npm run jest"
+  },
+  "dependencies": {
+    "qs": "^6.4.0"
   }
 }

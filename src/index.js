@@ -1,5 +1,6 @@
 /* global fetch, Headers, Request */
 // @flow
+import qs from 'qs'
 type OptionsRequest = {
   abort: () => void;
   promise: Promise<*>;
@@ -31,6 +32,10 @@ function parseJson (str: string): ?{[key: string]: mixed} {
 }
 
 function ajax (url: string, options: Options): OptionsRequest {
+  if (options.method === 'GET' && options.data) {
+    url = `${url}?${qs.stringify(options.data)}`
+    delete options.data
+  }
   const request = new Request(url, ajaxOptions(options))
   const xhr = fetch(request)
   const promise = new Promise((resolve, reject) => {
