@@ -9,13 +9,16 @@ type OptionsRequest = {
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 type Options = {
   method: Method;
+  headers?: ?{ [key: string]: string };
   onProgress?: (num: number) => mixed;
   data?: ?{ [key: string]: mixed };
 }
 
-function ajaxOptions (options: Options): any {
-  const headers = new Headers()
-  headers.append('Content-Type', 'application/json')
+export function ajaxOptions (options: Options): any {
+  const headers = new Headers(Object.assign({}, {
+    'Content-Type': 'application/json'
+  }, options.headers))
+
   return {
     method: options.method,
     headers,

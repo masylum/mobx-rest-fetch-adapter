@@ -1,4 +1,4 @@
-import adapter from '../src'
+import adapter, { ajaxOptions } from '../src'
 global.fetch = require('jest-fetch-mock')
 
 adapter.apiPath = '/api'
@@ -22,6 +22,20 @@ function injectFail (values) {
 }
 
 describe('adapter', () => {
+  describe('ajaxOptions(options)', () => {
+    it('allows to define custom headers', () => {
+      const options = ajaxOptions({
+        headers: {
+          'some-header': 'test1',
+          'some-other-header': 'test2'
+        }
+      })
+
+      expect(options.headers.get('some-header')).toEqual('test1')
+      expect(options.headers.get('some-other-header')).toEqual('test2')
+    })
+  })
+
   describe('ajax', () => {
     describe('when it fails with a malformed response', () => {
       const values = 'ERROR'
