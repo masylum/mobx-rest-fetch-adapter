@@ -1,6 +1,7 @@
 /* global fetch, Headers, Request */
 // @flow
 import qs from 'qs'
+import deepExtend from 'deep-extend'
 type OptionsRequest = {
   abort: () => void;
   promise: Promise<*>;
@@ -61,32 +62,33 @@ function ajax (url: string, options: Options): OptionsRequest {
 
 export default {
   apiPath: '',
+  commonOptions: {},
 
   get (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      Object.assign({}, { method: 'GET', data }, options)
+      deepExtend({}, { method: 'GET' }, this.commonOptions, options, { data })
     )
   },
 
   post (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      Object.assign({}, { method: 'POST', data }, options)
+      deepExtend({}, { method: 'POST' }, this.commonOptions, options, { data })
     )
   },
 
   put (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      Object.assign({}, { method: 'PUT', data }, options)
+      deepExtend({}, { method: 'PUT' }, this.commonOptions, options, { data })
     )
   },
 
   del (path: string, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      Object.assign({}, { method: 'DELETE' }, options)
+      deepExtend({}, { method: 'DELETE' }, this.commonOptions, options)
     )
   }
 }
