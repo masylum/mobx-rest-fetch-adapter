@@ -1,4 +1,4 @@
-import adapter from '../src'
+import adapter, { ajaxOptions } from '../src'
 global.fetch = require('jest-fetch-mock')
 
 adapter.apiPath = '/api'
@@ -21,7 +21,54 @@ function injectFail (values) {
   )
 }
 
+function testCommonOptions (method) {
+  return it('deep merges the default `commonOptions` with the passed options', () => {
+    adapter.commonOptions = {
+      headers: {
+        'some-header': 'test1'
+      }
+    }
+
+    const options = {
+      headers: {
+        'some-other-header': 'test2'
+      }
+    }
+
+    injectDone({})
+
+    const args = method === 'del'
+      ? ['/users', options]
+      : ['/users', null, options]
+
+    const request = adapter[method].apply(adapter, args)
+
+    return request.promise.then(() => {
+      expect(lastRequest().headers.get('some-header')).toEqual('test1')
+      expect(lastRequest().headers.get('some-other-header')).toEqual('test2')
+    })
+  })
+}
+
 describe('adapter', () => {
+  beforeEach(() => {
+    adapter.commonOptions = {}
+  })
+
+  describe('ajaxOptions(options)', () => {
+    it('allows to define custom headers', () => {
+      const options = ajaxOptions({
+        headers: {
+          'some-header': 'test1',
+          'some-other-header': 'test2'
+        }
+      })
+
+      expect(options.headers.get('some-header')).toEqual('test1')
+      expect(options.headers.get('some-other-header')).toEqual('test2')
+    })
+  })
+
   describe('ajax', () => {
     describe('when it fails with a malformed response', () => {
       const values = 'ERROR'
@@ -47,6 +94,8 @@ describe('adapter', () => {
     const action = () => {
       ret = adapter.get('/users', data)
     }
+
+    testCommonOptions('get')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -92,6 +141,8 @@ describe('adapter', () => {
     const action = () => {
       ret = adapter.post('/users', data)
     }
+
+    testCommonOptions('post')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -141,6 +192,8 @@ describe('adapter', () => {
       ret = adapter.put('/users', data)
     }
 
+    testCommonOptions('put')
+
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
 
@@ -184,6 +237,8 @@ describe('adapter', () => {
     const action = () => {
       ret = adapter.del('/users')
     }
+
+    testCommonOptions('del')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }

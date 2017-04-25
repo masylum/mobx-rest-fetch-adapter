@@ -46,6 +46,7 @@
     "test": "npm run flow && npm run lint && npm run jest"
   },
   "dependencies": {
+    "deep-extend": "^0.4.1",
     "qs": "^6.4.0"
   }
 }
