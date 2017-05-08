@@ -1,6 +1,6 @@
 {
   "name": "mobx-rest-fetch-adapter",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "fetch adapter for mobx-rest",
   "repository": {
     "type": "git",
