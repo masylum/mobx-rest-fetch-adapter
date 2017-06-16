@@ -120,7 +120,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
@@ -171,7 +171,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         data = { name: 'paco' }
@@ -222,7 +222,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
@@ -269,7 +269,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
