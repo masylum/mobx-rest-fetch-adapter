@@ -79,6 +79,8 @@ describe('adapter', () => {
       })
 
       it('returns the error wrapper into an array', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -126,6 +128,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -176,6 +180,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -224,6 +230,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -269,6 +277,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
