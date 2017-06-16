@@ -27,18 +27,10 @@ export function ajaxOptions (options: Options): any {
   }
 }
 
-export function checkStatus (response): any {
+export function checkStatus (response: any): any {
   return response.json().then(json => {
     return response.ok ? json : Promise.reject(json)
-  });
-}
-
-function parseJson (str: string): ?{[key: string]: mixed} {
-  try {
-    return JSON.parse(str)
-  } catch (_error) {
-    return null
-  }
+  })
 }
 
 function ajax (url: string, options: Options): OptionsRequest {

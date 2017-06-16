@@ -90,7 +90,7 @@ describe('adapter', () => {
       it('returns a rejected promise with the parsed json', () => {
         expect.assertions(1)
 
-        const someData = { errors: { name: 'Already in use' } }
+        const someData = { errors: { name: 'Already in use' } }
         const response = {
           ok: false,
           json: () => Promise.resolve(someData)
