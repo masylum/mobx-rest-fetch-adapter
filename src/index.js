@@ -27,6 +27,12 @@ export function ajaxOptions (options: Options): any {
   }
 }
 
+export function checkStatus (response): any {
+  return response.json().then(json => {
+    return response.ok ? json : Promise.reject(json)
+  });
+}
+
 function parseJson (str: string): ?{[key: string]: mixed} {
   try {
     return JSON.parse(str)
@@ -43,16 +49,11 @@ function ajax (url: string, options: Options): OptionsRequest {
   const request = new Request(url, ajaxOptions(options))
   const xhr = fetch(request)
   const promise = new Promise((resolve, reject) => {
-    xhr.then(
-      (response) => {
-        response.json().then(resolve)
-      },
-      (error) => {
-        const json = parseJson(error)
-        const ret = json ? json.errors : {}
+    xhr.then(checkStatus).then(resolve, (error) => {
+      const ret = error ? error.errors : {}
 
-        return reject(ret || {})
-      })
+      return reject(ret || {})
+    })
   })
 
   const abort = () => {} // noop, fetch is not cancelable

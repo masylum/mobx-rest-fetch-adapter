@@ -1,4 +1,4 @@
-import adapter, { ajaxOptions } from '../src'
+import adapter, { ajaxOptions, checkStatus } from '../src'
 global.fetch = require('jest-fetch-mock')
 
 adapter.apiPath = '/api'
@@ -66,6 +66,40 @@ describe('adapter', () => {
 
       expect(options.headers.get('some-header')).toEqual('test1')
       expect(options.headers.get('some-other-header')).toEqual('test2')
+    })
+  })
+
+  describe('checkStatus(response)', () => {
+    describe('if response is ok', () => {
+      it('returns a resolved promise with the parsed json', () => {
+        expect.assertions(1)
+
+        const someData = { data: 'ok' }
+        const response = {
+          ok: true,
+          json: () => Promise.resolve(someData)
+        }
+
+        return checkStatus(response).then(json => {
+          expect(json).toEqual(someData)
+        })
+      })
+    })
+
+    describe('if response is not ok', () => {
+      it('returns a rejected promise with the parsed json', () => {
+        expect.assertions(1)
+
+        const someData = { errors: { name: 'Already in use' } }
+        const response = {
+          ok: false,
+          json: () => Promise.resolve(someData)
+        }
+
+        return checkStatus(response).catch(json => {
+          expect(json).toEqual(someData)
+        })
+      })
     })
   })
 
