@@ -1,4 +1,4 @@
-import adapter, { ajaxOptions } from '../src'
+import adapter, { ajaxOptions, checkStatus } from '../src'
 global.fetch = require('jest-fetch-mock')
 
 adapter.apiPath = '/api'
@@ -69,6 +69,40 @@ describe('adapter', () => {
     })
   })
 
+  describe('checkStatus(response)', () => {
+    describe('if response is ok', () => {
+      it('returns a resolved promise with the parsed json', () => {
+        expect.assertions(1)
+
+        const someData = { data: 'ok' }
+        const response = {
+          ok: true,
+          json: () => Promise.resolve(someData)
+        }
+
+        return checkStatus(response).then(json => {
+          expect(json).toEqual(someData)
+        })
+      })
+    })
+
+    describe('if response is not ok', () => {
+      it('returns a rejected promise with the parsed json', () => {
+        expect.assertions(1)
+
+        const someData = { errors: { name: 'Already in use' } }
+        const response = {
+          ok: false,
+          json: () => Promise.resolve(someData)
+        }
+
+        return checkStatus(response).catch(json => {
+          expect(json).toEqual(someData)
+        })
+      })
+    })
+  })
+
   describe('ajax', () => {
     describe('when it fails with a malformed response', () => {
       const values = 'ERROR'
@@ -79,6 +113,8 @@ describe('adapter', () => {
       })
 
       it('returns the error wrapper into an array', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -118,7 +154,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
@@ -126,6 +162,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -167,7 +205,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         data = { name: 'paco' }
@@ -176,6 +214,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -216,7 +256,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
@@ -224,6 +264,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
@@ -261,7 +303,7 @@ describe('adapter', () => {
     })
 
     describe('when it fails', () => {
-      const values = '{"errors": ["foo"]}'
+      const values = {errors: ['foo']}
 
       beforeEach(() => {
         injectFail(values)
@@ -269,6 +311,8 @@ describe('adapter', () => {
       })
 
       it('sends a xhr request with data parameters', () => {
+        expect.assertions(2)
+
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch((vals) => {
