@@ -21,6 +21,7 @@ export function ajaxOptions (options: Options): any {
   }, options.headers))
 
   return {
+    ...options,
     method: options.method,
     headers,
     body: options.data ? JSON.stringify(options.data) : null
