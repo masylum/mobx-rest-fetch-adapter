@@ -67,6 +67,14 @@ describe('adapter', () => {
       expect(options.headers.get('some-header')).toEqual('test1')
       expect(options.headers.get('some-other-header')).toEqual('test2')
     })
+
+    it('allows to pass any option to fetch', () => {
+      const options = ajaxOptions({
+        credentials: 'same-origin'
+      })
+
+      expect(options.credentials).toEqual('same-origin')
+    })
   })
 
   describe('checkStatus(response)', () => {
