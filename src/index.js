@@ -16,14 +16,15 @@ type Options = {
 }
 
 export function ajaxOptions (options: Options): any {
-  const headers = new Headers(Object.assign({}, {
+  const { headers, data, ...otherOptions } = options
+  const headersObject = new Headers(Object.assign({}, {
     'Content-Type': 'application/json'
-  }, options.headers))
+  }, headers))
 
   return {
-    method: options.method,
-    headers,
-    body: options.data ? JSON.stringify(options.data) : null
+    ...otherOptions,
+    headers: headersObject,
+    body: data ? JSON.stringify(data) : null
   }
 }
 
