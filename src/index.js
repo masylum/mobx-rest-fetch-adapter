@@ -16,25 +16,6 @@ type Options = {
   data?: ?{ [key: string]: mixed }
 }
 
-export function ajaxOptions (options: Options): any {
-  const { headers, data, ...otherOptions } = options
-  const headersObject = new Headers(
-    Object.assign(
-      {},
-      {
-        'Content-Type': 'application/json'
-      },
-      headers
-    )
-  )
-
-  return {
-    ...otherOptions,
-    headers: headersObject,
-    body: data ? JSON.stringify(data) : null
-  }
-}
-
 export function checkStatus (response: any): any {
   return response.json().then(json => {
     return response.ok ? json : Promise.reject(json)
@@ -47,11 +28,28 @@ function ajax (url: string, options: Options): OptionsRequest {
     delete options.data
   }
 
-  if (typeof fetch === 'undefined') { // eslint-disable-line
-    var { fetch } = require('fetch-ponyfill')()
+  if (typeof fetch === 'undefined') {
+    var { fetch, Headers } = require('fetch-ponyfill')()
   }
 
-  const xhr = fetch(url, ajaxOptions(options))
+  const { headers, data, ...otherOptions } = options
+
+  const headersObject = new Headers(
+    Object.assign(
+      {},
+      {
+        'Content-Type': 'application/json'
+      },
+      headers
+    )
+  )
+
+  const xhr = fetch(url, {
+    ...otherOptions,
+    headers: headersObject,
+    body: data ? JSON.stringify(data) : null
+  })
+
   const promise = new Promise((resolve, reject) => {
     xhr.then(checkStatus).then(resolve, error => {
       const ret = error ? error.errors : {}
