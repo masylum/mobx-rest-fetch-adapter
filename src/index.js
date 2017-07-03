@@ -1,25 +1,32 @@
-/* global fetch, Headers, Request */
+/* global Headers */
 // @flow
 import qs from 'qs'
 import deepExtend from 'deep-extend'
+
 type OptionsRequest = {
-  abort: () => void;
-  promise: Promise<*>;
+  abort: () => void,
+  promise: Promise<*>
 }
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 type Options = {
-  method: Method;
-  headers?: ?{ [key: string]: string };
-  onProgress?: (num: number) => mixed;
-  data?: ?{ [key: string]: mixed };
+  method: Method,
+  headers?: ?{ [key: string]: string },
+  onProgress?: (num: number) => mixed,
+  data?: ?{ [key: string]: mixed }
 }
 
 export function ajaxOptions (options: Options): any {
   const { headers, data, ...otherOptions } = options
-  const headersObject = new Headers(Object.assign({}, {
-    'Content-Type': 'application/json'
-  }, headers))
+  const headersObject = new Headers(
+    Object.assign(
+      {},
+      {
+        'Content-Type': 'application/json'
+      },
+      headers
+    )
+  )
 
   return {
     ...otherOptions,
@@ -39,10 +46,14 @@ function ajax (url: string, options: Options): OptionsRequest {
     url = `${url}?${qs.stringify(options.data)}`
     delete options.data
   }
-  const request = new Request(url, ajaxOptions(options))
-  const xhr = fetch(request)
+
+  if (typeof fetch === 'undefined') { // eslint-disable-line
+    var { fetch } = require('fetch-ponyfill')()
+  }
+
+  const xhr = fetch(url, ajaxOptions(options))
   const promise = new Promise((resolve, reject) => {
-    xhr.then(checkStatus).then(resolve, (error) => {
+    xhr.then(checkStatus).then(resolve, error => {
       const ret = error ? error.errors : {}
 
       return reject(ret || {})
