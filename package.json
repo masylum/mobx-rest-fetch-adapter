@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "deep-extend": "^0.4.1",
+    "fetch-ponyfill": "^4.0.0",
     "qs": "^6.4.0"
   }
 }
