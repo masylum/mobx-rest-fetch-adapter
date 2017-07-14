@@ -130,6 +130,16 @@ describe('adapter', () => {
         })
       })
     })
+
+    describe('when aborted', () => {
+      it('rejects the request promise with an "abort" message', () => {
+        const { abort, promise } = adapter.get()
+
+        abort()
+
+        return expect(promise).rejects.toBe('abort')
+      })
+    })
   })
 
   describe('get', () => {
