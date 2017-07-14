@@ -41,7 +41,11 @@ function ajax (url: string, options: Options): OptionsRequest {
   }
   const request = new Request(url, ajaxOptions(options))
   const xhr = fetch(request)
+  let rejectPromise
+
   const promise = new Promise((resolve, reject) => {
+    rejectPromise = reject
+
     xhr.then(checkStatus).then(resolve, (error) => {
       const ret = error ? error.errors : {}
 
@@ -49,7 +53,7 @@ function ajax (url: string, options: Options): OptionsRequest {
     })
   })
 
-  const abort = () => {} // noop, fetch is not cancelable
+  const abort = () => rejectPromise('abort')
 
   return { abort, promise }
 }
