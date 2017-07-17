@@ -1,24 +1,25 @@
 import adapter, { ajaxOptions, checkStatus } from '../src'
-global.fetch = require('jest-fetch-mock')
 
+global.fetch = require('jest-fetch-mock')
 adapter.apiPath = '/api'
 
 let ret
 function lastRequest () {
   const mock = global.fetch.mock
-  return mock.calls[mock.calls.length - 1][0]
+  const lastCall = mock.calls[mock.calls.length - 1]
+
+  return {
+    url: lastCall[0],
+    ...lastCall[1]
+  }
 }
 
 function injectDone (values) {
-  global.fetch.mockResponseOnce(
-    JSON.stringify(values), { status: 200 }
-  )
+  global.fetch.mockResponseOnce(JSON.stringify(values), { status: 200 })
 }
 
 function injectFail (values) {
-  global.fetch.mockResponseOnce(
-    JSON.stringify(values), { status: 422 }
-  )
+  global.fetch.mockResponseOnce(JSON.stringify(values), { status: 422 })
 }
 
 function testCommonOptions (method) {
@@ -37,9 +38,8 @@ function testCommonOptions (method) {
 
     injectDone({})
 
-    const args = method === 'del'
-      ? ['/users', options]
-      : ['/users', null, options]
+    const args =
+      method === 'del' ? ['/users', options] : ['/users', null, options]
 
     const request = adapter[method].apply(adapter, args)
 
@@ -125,8 +125,20 @@ describe('adapter', () => {
 
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.catch((vals) => {
+        return ret.promise.catch(vals => {
           expect(vals).toEqual({})
+        })
+      })
+    })
+
+    describe('when aborted', () => {
+      it.only('rejects the request promise with an "abort" message', () => {
+        const { abort, promise } = adapter.get()
+
+        abort()
+
+        return promise.catch(vals => {
+          expect(vals).toEqual('abort')
         })
       })
     })
@@ -152,17 +164,19 @@ describe('adapter', () => {
       it('sends a xhr request with data parameters', () => {
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.then((vals) => {
+        return ret.promise.then(vals => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toBe('/api/users?manager_id=2')
           expect(lastRequest().method).toBe('GET')
-          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
+          expect(lastRequest().headers.map['content-type']).toEqual([
+            'application/json'
+          ])
         })
       })
     })
 
     describe('when it fails', () => {
-      const values = {errors: ['foo']}
+      const values = { errors: ['foo'] }
 
       beforeEach(() => {
         injectFail(values)
@@ -174,7 +188,7 @@ describe('adapter', () => {
 
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.catch((vals) => {
+        return ret.promise.catch(vals => {
           expect(vals).toEqual(['foo'])
         })
       })
@@ -202,18 +216,20 @@ describe('adapter', () => {
       it('sends a xhr request with data parameters', () => {
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.then((vals) => {
+        return ret.promise.then(vals => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toBe('/api/users')
           expect(lastRequest().method).toBe('POST')
-          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
-          expect(lastRequest()._bodyInit).toBe('{"name":"paco"}')
+          expect(lastRequest().headers.map['content-type']).toEqual([
+            'application/json'
+          ])
+          expect(lastRequest().body).toBe('{"name":"paco"}')
         })
       })
     })
 
     describe('when it fails', () => {
-      const values = {errors: ['foo']}
+      const values = { errors: ['foo'] }
 
       beforeEach(() => {
         data = { name: 'paco' }
@@ -226,7 +242,7 @@ describe('adapter', () => {
 
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.catch((vals) => {
+        return ret.promise.catch(vals => {
           expect(vals).toEqual(['foo'])
         })
       })
@@ -253,18 +269,20 @@ describe('adapter', () => {
       it('sends a xhr request with data parameters', () => {
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.then((vals) => {
+        return ret.promise.then(vals => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toBe('/api/users')
           expect(lastRequest().method).toBe('PUT')
-          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
-          expect(lastRequest()._bodyInit).toBe('{"name":"paco"}')
+          expect(lastRequest().headers.map['content-type']).toEqual([
+            'application/json'
+          ])
+          expect(lastRequest().body).toBe('{"name":"paco"}')
         })
       })
     })
 
     describe('when it fails', () => {
-      const values = {errors: ['foo']}
+      const values = { errors: ['foo'] }
 
       beforeEach(() => {
         injectFail(values)
@@ -276,7 +294,7 @@ describe('adapter', () => {
 
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.catch((vals) => {
+        return ret.promise.catch(vals => {
           expect(vals).toEqual(['foo'])
         })
       })
@@ -301,17 +319,19 @@ describe('adapter', () => {
       it('sends a xhr request with data parameters', () => {
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.then((vals) => {
+        return ret.promise.then(vals => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toEqual('/api/users')
           expect(lastRequest().method).toBe('DELETE')
-          expect(lastRequest().headers.map['content-type']).toEqual(['application/json'])
+          expect(lastRequest().headers.map['content-type']).toEqual([
+            'application/json'
+          ])
         })
       })
     })
 
     describe('when it fails', () => {
-      const values = {errors: ['foo']}
+      const values = { errors: ['foo'] }
 
       beforeEach(() => {
         injectFail(values)
@@ -323,7 +343,7 @@ describe('adapter', () => {
 
         expect(ret.abort).toBeTruthy()
 
-        return ret.promise.catch((vals) => {
+        return ret.promise.catch(vals => {
           expect(vals).toEqual(['foo'])
         })
       })

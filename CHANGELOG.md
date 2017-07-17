@@ -1,5 +1,11 @@
 # Changelog
 
+## `0.1.2`
+
+:tophat:
+
+  - Allow to abort the fetch promise. Kudos to @rdiazv for this!
+
 ## `0.1.1`
 
 :tophat:

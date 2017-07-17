@@ -1,7 +1,8 @@
-/* global Headers */
+/* global fetch, Headers */
 // @flow
 import qs from 'qs'
 import deepExtend from 'deep-extend'
+import ponyfill from 'fetch-ponyfill'
 
 type OptionsRequest = {
   abort: () => void,
@@ -16,25 +17,15 @@ type Options = {
   data?: ?{ [key: string]: mixed }
 }
 
-export function checkStatus (response: any): any {
-  return response.json().then(json => {
-    return response.ok ? json : Promise.reject(json)
-  })
-}
-
-function ajax (url: string, options: Options): OptionsRequest {
-  if (options.method === 'GET' && options.data) {
-    url = `${url}?${qs.stringify(options.data)}`
-    delete options.data
-  }
-
-  if (typeof fetch === 'undefined') {
-    var { fetch, Headers } = require('fetch-ponyfill')()
-  }
-
+export function ajaxOptions (options: Options): any {
+  let HeadersConstructor = Headers
   const { headers, data, ...otherOptions } = options
 
-  const headersObject = new Headers(
+  if (typeof HeadersConstructor === 'undefined') {
+    HeadersConstructor = ponyfill().Headers
+  }
+
+  const headersObject = new HeadersConstructor(
     Object.assign(
       {},
       {
@@ -44,13 +35,35 @@ function ajax (url: string, options: Options): OptionsRequest {
     )
   )
 
-  const xhr = fetch(url, {
+  return {
     ...otherOptions,
     headers: headersObject,
     body: data ? JSON.stringify(data) : null
-  })
+  }
+}
 
+export function checkStatus (response: any): any {
+  return response.json().then(json => {
+    return response.ok ? json : Promise.reject(json)
+  })
+}
+
+function ajax (url: string, options: Options): OptionsRequest {
+  let fetchMethod = fetch
+  let rejectPromise
+
+  if (options.method === 'GET' && options.data) {
+    url = `${url}?${qs.stringify(options.data)}`
+    delete options.data
+  }
+
+  if (typeof fetchMethod === 'undefined') {
+    fetchMethod = ponyfill().fetch
+  }
+
+  const xhr = fetchMethod(url, ajaxOptions(options))
   const promise = new Promise((resolve, reject) => {
+    rejectPromise = reject
     xhr.then(checkStatus).then(resolve, error => {
       const ret = error ? error.errors : {}
 
@@ -58,7 +71,7 @@ function ajax (url: string, options: Options): OptionsRequest {
     })
   })
 
-  const abort = () => {} // noop, fetch is not cancelable
+  const abort = () => rejectPromise('abort')
 
   return { abort, promise }
 }
