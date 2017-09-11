@@ -1,5 +1,11 @@
 # Changelog
 
+## `0.1.3`
+
+:bug:
+
+  - Remove deepExtend dependency and use lodash instead
+
 ## `0.1.2`
 
 :tophat:
