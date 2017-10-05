@@ -25,12 +25,14 @@ export function ajaxOptions (options: Options): any {
     HeadersConstructor = ponyfill().Headers
   }
 
+  const baseHeaders = {}
+  if (data) {
+    baseHeaders['Content-Type'] = 'application/json'
+  }
+
   const headersObject = new HeadersConstructor(
     Object.assign(
-      {},
-      {
-        'Content-Type': 'application/json'
-      },
+      baseHeaders,
       headers
     )
   )

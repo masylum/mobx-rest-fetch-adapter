@@ -132,7 +132,7 @@ describe('adapter', () => {
     })
 
     describe('when aborted', () => {
-      it.only('rejects the request promise with an "abort" message', () => {
+      it('rejects the request promise with an "abort" message', () => {
         const { abort, promise } = adapter.get()
 
         abort()
@@ -168,9 +168,7 @@ describe('adapter', () => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toBe('/api/users?manager_id=2')
           expect(lastRequest().method).toBe('GET')
-          expect(lastRequest().headers.map['content-type']).toEqual([
-            'application/json'
-          ])
+          expect(lastRequest().headers.map).toEqual({})
         })
       })
     })
@@ -323,9 +321,7 @@ describe('adapter', () => {
           expect(vals).toEqual(values)
           expect(lastRequest().url).toEqual('/api/users')
           expect(lastRequest().method).toBe('DELETE')
-          expect(lastRequest().headers.map['content-type']).toEqual([
-            'application/json'
-          ])
+          expect(lastRequest().headers.map).toEqual({})
         })
       })
     })
