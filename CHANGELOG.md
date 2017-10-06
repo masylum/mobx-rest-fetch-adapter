@@ -1,5 +1,11 @@
 # Changelog
 
+## `0.1.4`
+
+:bug:
+
+  - Use `Content-Type: application/json` header only for those requests with a body
+
 ## `0.1.3`
 
 :bug:
