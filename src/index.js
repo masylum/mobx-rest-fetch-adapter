@@ -31,10 +31,7 @@ export function ajaxOptions (options: Options): any {
   }
 
   const headersObject = new HeadersConstructor(
-    Object.assign(
-      baseHeaders,
-      headers
-    )
+    Object.assign(baseHeaders, headers)
   )
 
   return {
