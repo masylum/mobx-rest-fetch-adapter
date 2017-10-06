@@ -53,14 +53,14 @@
     "flow": "flow",
     "test": "npm run flow && npm run lint && npm run jest",
     "format": "prettier-standard --print-width 60 \"{src,__tests__}/**/*.js\"",
-    "prepush": "npm test",
-    "lint-staged": {
-      "linters": {
-        "{src|__tests__}/**/*.js": [
-          "prettier-standard",
-          "git add"
-        ]
-      }
+    "prepush": "npm test"
+  },
+  "lint-staged": {
+    "linters": {
+      "{src|__tests__}/**/*.js": [
+        "prettier-standard",
+        "git add"
+      ]
     }
   },
   "dependencies": {
