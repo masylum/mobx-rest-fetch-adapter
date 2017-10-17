@@ -42,9 +42,19 @@ export function ajaxOptions (options: Options): any {
 }
 
 export function checkStatus (response: any): any {
-  return response.json().then(json => {
-    return response.ok ? json : Promise.reject(json)
-  })
+  return response.text()
+    .then((text) => {
+      let body
+      try {
+        body = JSON.parse(text)
+      } catch (e) {
+        body = text
+      }
+      if (!response.ok) return Promise.reject(body)
+      // allow 204 response with empty body
+      if (text === '') return {}
+      return body
+    })
 }
 
 function ajax (url: string, options: Options): OptionsRequest {
@@ -63,10 +73,11 @@ function ajax (url: string, options: Options): OptionsRequest {
   const xhr = fetchMethod(url, ajaxOptions(options))
   const promise = new Promise((resolve, reject) => {
     rejectPromise = reject
-    xhr.then(checkStatus).then(resolve, error => {
-      const ret = error ? error.errors : {}
-
-      return reject(ret || {})
+    xhr.then(checkStatus).then(resolve, (error) => {
+      // FIXME this needs to be configurable
+      return reject({
+        message: error.error,
+      })
     })
   })
 
