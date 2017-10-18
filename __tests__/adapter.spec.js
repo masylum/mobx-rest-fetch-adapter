@@ -38,10 +38,7 @@ function testCommonOptions (method) {
 
     injectDone({})
 
-    const args =
-      method === 'del' ? ['/users', options] : ['/users', null, options]
-
-    const request = adapter[method].apply(adapter, args)
+    const request = adapter[method]('/users', null, options)
 
     return request.promise.then(() => {
       expect(lastRequest().headers.get('some-header')).toEqual('test1')

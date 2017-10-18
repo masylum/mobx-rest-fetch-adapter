@@ -100,10 +100,10 @@ export default {
     )
   },
 
-  del (path: string, options?: {} = {}): OptionsRequest {
+  del (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      merge({}, { method: 'DELETE' }, this.commonOptions, options)
+      merge({}, { method: 'DELETE' }, this.commonOptions, options, { data })
     )
   }
 }
