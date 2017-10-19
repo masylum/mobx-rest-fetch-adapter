@@ -50,7 +50,12 @@ export function checkStatus (response: any): any {
       } catch (e) {
         body = text
       }
-      if (!response.ok) return Promise.reject(body)
+      if (!response.ok) {
+        return Promise.reject({
+          body,
+          response
+        })
+      }
       // allow 204 response with empty body
       if (text === '') return {}
       return body
@@ -73,10 +78,11 @@ function ajax (url: string, options: Options): OptionsRequest {
   const xhr = fetchMethod(url, ajaxOptions(options))
   const promise = new Promise((resolve, reject) => {
     rejectPromise = reject
-    xhr.then(checkStatus).then(resolve, (error) => {
+    xhr.then(checkStatus).then(resolve, ({ body, response }) => {
       // FIXME this needs to be configurable
       return reject({
-        message: error.error,
+        message: body.error,
+        status: response.status
       })
     })
   })
