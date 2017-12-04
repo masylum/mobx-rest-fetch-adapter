@@ -1,4 +1,5 @@
 import adapter, { ajaxOptions, checkStatus } from '../src'
+import qs from 'qs'
 
 global.fetch = require('jest-fetch-mock')
 adapter.apiPath = '/api'
@@ -141,6 +142,15 @@ describe('adapter', () => {
           expect(vals).toEqual('abort')
         })
       })
+    })
+
+    it('should allow to pass options to qs.stringify', () => {
+      const data = { someArray: [1, 2, 3] }
+      const qsOptions = { indices: false }
+
+      adapter.get('/users', data, { qsOptions })
+
+      expect(lastRequest().url.split('?')[1]).toEqual(qs.stringify(data, qsOptions))
     })
   })
 
