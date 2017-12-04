@@ -55,6 +55,7 @@ function ajax (url: string, options: Options): OptionsRequest {
   if (options.method === 'GET' && options.data) {
     url = `${url}?${qs.stringify(options.data, options.qsOptions)}`
     delete options.data
+    delete options.qsOptions
   }
 
   if (typeof fetchMethod === 'undefined') {
