@@ -19,8 +19,8 @@ function injectDone (values) {
   global.fetch.mockResponseOnce(JSON.stringify(values), { status: 200 })
 }
 
-function injectFail (values) {
-  global.fetch.mockResponseOnce(JSON.stringify(values), { status: 422 })
+function injectFail (values, status = 422) {
+  global.fetch.mockResponseOnce(JSON.stringify(values), { status })
 }
 
 function testDefaults (method) {
@@ -78,7 +78,7 @@ describe('adapter', () => {
 
   describe('checkStatus(response)', () => {
     describe('if response is ok', () => {
-      it('returns a resolved promise with the parsed json', () => {
+      it('returns a resolved promise', () => {
         expect.assertions(1)
 
         const someData = { data: 'ok' }
@@ -87,14 +87,16 @@ describe('adapter', () => {
           json: () => Promise.resolve(someData)
         }
 
-        return checkStatus(response).then(json => {
-          expect(json).toEqual(someData)
+        return checkStatus(response).then(vals => {
+          return vals.json().then(response => {
+            expect(response).toEqual(someData)
+          })
         })
       })
     })
 
     describe('if response is not ok', () => {
-      it('returns a rejected promise with the parsed json', () => {
+      it('returns a rejected promise', () => {
         expect.assertions(1)
 
         const someData = { errors: { name: 'Already in use' } }
@@ -103,8 +105,10 @@ describe('adapter', () => {
           json: () => Promise.resolve(someData)
         }
 
-        return checkStatus(response).catch(json => {
-          expect(json).toEqual(someData)
+        return checkStatus(response).catch(vals => {
+          return vals.json().then(error => {
+            expect(error).toEqual(someData)
+          })
         })
       })
     })
@@ -125,7 +129,19 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual({})
+          expect(vals.json).toEqual({})
+        })
+      })
+    })
+
+    describe('when it fails', () => {
+      it('should allow to get the response status', () => {
+        injectFail({ errors: 'Not found' }, 404)
+
+        const ret = adapter.get('/users')
+
+        return ret.promise.catch(vals => {
+          expect(vals.response.status).toBe(404)
         })
       })
     })
@@ -195,7 +211,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.json).toEqual(['foo'])
         })
       })
     })
@@ -249,7 +265,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.json).toEqual(['foo'])
         })
       })
     })
@@ -301,7 +317,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.json).toEqual(['foo'])
         })
       })
     })
@@ -348,7 +364,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.json).toEqual(['foo'])
         })
       })
     })

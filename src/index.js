@@ -37,9 +37,7 @@ export function ajaxOptions (options: Options): any {
 }
 
 export function checkStatus (response: any): any {
-  return response.json().then(json => {
-    return response.ok ? json : Promise.reject(json)
-  })
+  return response.ok ? Promise.resolve(response) : Promise.reject(response)
 }
 
 const methodsMapping = {
@@ -55,11 +53,17 @@ const adapter = {
   urlRoot: '',
   defaults: {},
 
+  errorUnwrap: (error, _config) => {
+    return (error ? error.errors : {}) || {}
+  },
+
   request (method: string, path: string, options?: {} = {}): OptionsRequest {
     let url = `${this.urlRoot}${path}`
     let rejectPromise
 
     options = merge({}, this.defaults, { method }, options)
+
+    const finalOptions = { ...options }
 
     if (method === 'GET' && options.data) {
       url = `${url}?${qs.stringify(options.data, options.qs)}`
@@ -70,11 +74,18 @@ const adapter = {
     const xhr = fetch(url, ajaxOptions(options))
     const promise = new Promise((resolve, reject) => {
       rejectPromise = reject
-      xhr.then(checkStatus).then(resolve, error => {
-        const ret = error ? error.errors : {}
-
-        return reject(ret || {})
-      })
+      xhr
+        .then(checkStatus)
+        .then(response => response.json())
+        .then(resolve)
+        .catch(response => {
+          response.json().then(error => {
+            reject({
+              response,
+              json: this.errorUnwrap(error, { options: finalOptions, path })
+            })
+          })
+        })
     })
 
     const abort = () => rejectPromise('abort')
