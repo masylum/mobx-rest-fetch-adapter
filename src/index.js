@@ -58,11 +58,11 @@ const methodsMapping = {
 }
 
 const adapter = {
-  apiPath: '',
+  urlRoot: '',
   defaults: {},
 
   request (method: string, path: string, options?: {} = {}): OptionsRequest {
-    let url = `${this.apiPath}${path}`
+    let url = `${this.urlRoot}${path}`
     let fetchMethod = fetch
     let rejectPromise
 

@@ -2,7 +2,7 @@ import adapter, { ajaxOptions, checkStatus } from '../src'
 import qs from 'qs'
 
 global.fetch = require('jest-fetch-mock')
-adapter.apiPath = '/api'
+adapter.urlRoot = '/api'
 
 let ret
 function lastRequest () {
