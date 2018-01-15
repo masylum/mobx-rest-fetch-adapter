@@ -14,7 +14,7 @@ type Options = {
   headers?: ?{ [key: string]: string },
   onProgress?: (num: number) => mixed,
   data?: ?{ [key: string]: mixed },
-  qsOptions?: ?{ [key: mixed]: mixed }
+  qs?: ?{ [key: mixed]: mixed }
 }
 
 export function ajaxOptions (options: Options): any {
@@ -62,9 +62,9 @@ const adapter = {
     options = merge({}, this.defaults, { method }, options)
 
     if (method === 'GET' && options.data) {
-      url = `${url}?${qs.stringify(options.data, options.qsOptions)}`
+      url = `${url}?${qs.stringify(options.data, options.qs)}`
       delete options.data
-      delete options.qsOptions
+      delete options.qs
     }
 
     const xhr = fetch(url, ajaxOptions(options))

@@ -146,7 +146,7 @@ describe('adapter', () => {
       const data = { someArray: [1, 2, 3] }
       const qsOptions = { indices: false }
 
-      adapter.get('/users', { data, qsOptions })
+      adapter.get('/users', { data, qs: qsOptions })
 
       expect(lastRequest().url.split('?')[1]).toEqual(qs.stringify(data, qsOptions))
     })
