@@ -2,7 +2,6 @@
 // @flow
 import qs from 'qs'
 import merge from 'lodash.merge'
-import ponyfill from 'fetch-ponyfill'
 
 type OptionsRequest = {
   abort: () => void,
@@ -19,19 +18,14 @@ type Options = {
 }
 
 export function ajaxOptions (options: Options): any {
-  let HeadersConstructor = Headers
   const { headers, data, ...otherOptions } = options
   const baseHeaders = {}
-
-  if (typeof HeadersConstructor === 'undefined') {
-    HeadersConstructor = ponyfill().Headers
-  }
 
   if (data) {
     baseHeaders['Content-Type'] = 'application/json'
   }
 
-  const headersObject = new HeadersConstructor(
+  const headersObject = new Headers(
     Object.assign(baseHeaders, headers)
   )
 
@@ -63,7 +57,6 @@ const adapter = {
 
   request (method: string, path: string, options?: {} = {}): OptionsRequest {
     let url = `${this.urlRoot}${path}`
-    let fetchMethod = fetch
     let rejectPromise
 
     options = merge({}, this.defaults, { method }, options)
@@ -74,11 +67,7 @@ const adapter = {
       delete options.qsOptions
     }
 
-    if (typeof fetchMethod === 'undefined') {
-      fetchMethod = ponyfill().fetch
-    }
-
-    const xhr = fetchMethod(url, ajaxOptions(options))
+    const xhr = fetch(url, ajaxOptions(options))
     const promise = new Promise((resolve, reject) => {
       rejectPromise = reject
       xhr.then(checkStatus).then(resolve, error => {

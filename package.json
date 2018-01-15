@@ -37,9 +37,9 @@
     "jest": "^18.1.0",
     "jest-fetch-mock": "^1.0.8",
     "prettier-standard": "^5.0.0",
+    "rimraf": "^2.6.1",
     "snazzy": "^6.0.0",
-    "standard": "^8.6.0",
-    "rimraf": "^2.6.1"
+    "standard": "^8.6.0"
   },
   "main": "lib",
   "scripts": {
@@ -65,7 +65,6 @@
   },
   "dependencies": {
     "lodash.merge": "^4.6.0",
-    "fetch-ponyfill": "^4.0.0",
     "qs": "^6.4.0"
   }
 }
