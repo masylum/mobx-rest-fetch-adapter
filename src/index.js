@@ -79,33 +79,33 @@ function ajax (url: string, options: Options): OptionsRequest {
 
 export default {
   apiPath: '',
-  commonOptions: {},
+  defaults: {},
 
   get (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      merge({ method: 'GET' }, this.commonOptions, options, { data })
+      merge({ method: 'GET' }, this.defaults, options, { data })
     )
   },
 
   post (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      merge({ method: 'POST' }, this.commonOptions, options, { data })
+      merge({ method: 'POST' }, this.defaults, options, { data })
     )
   },
 
   put (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      merge({ method: 'PUT' }, this.commonOptions, options, { data })
+      merge({ method: 'PUT' }, this.defaults, options, { data })
     )
   },
 
   del (path: string, options?: {} = {}): OptionsRequest {
     return ajax(
       `${this.apiPath}${path}`,
-      merge({ method: 'DELETE' }, this.commonOptions, options)
+      merge({ method: 'DELETE' }, this.defaults, options)
     )
   }
 }

@@ -23,9 +23,9 @@ function injectFail (values) {
   global.fetch.mockResponseOnce(JSON.stringify(values), { status: 422 })
 }
 
-function testCommonOptions (method) {
-  return it('deep merges the default `commonOptions` with the passed options', () => {
-    adapter.commonOptions = {
+function testDefaults (method) {
+  return it('deep merges the default `defaults` with the passed options', () => {
+    adapter.defaults = {
       headers: {
         'some-header': 'test1'
       }
@@ -53,7 +53,7 @@ function testCommonOptions (method) {
 
 describe('adapter', () => {
   beforeEach(() => {
-    adapter.commonOptions = {}
+    adapter.defaults = {}
   })
 
   describe('ajaxOptions(options)', () => {
@@ -161,7 +161,7 @@ describe('adapter', () => {
       ret = adapter.get('/users', data)
     }
 
-    testCommonOptions('get')
+    testDefaults('get')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -210,7 +210,7 @@ describe('adapter', () => {
       ret = adapter.post('/users', data)
     }
 
-    testCommonOptions('post')
+    testDefaults('post')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -264,7 +264,7 @@ describe('adapter', () => {
       ret = adapter.put('/users', data)
     }
 
-    testCommonOptions('put')
+    testDefaults('put')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -314,7 +314,7 @@ describe('adapter', () => {
       ret = adapter.del('/users')
     }
 
-    testCommonOptions('del')
+    testDefaults('del')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
