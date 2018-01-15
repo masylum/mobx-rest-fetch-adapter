@@ -21,12 +21,12 @@ type Options = {
 export function ajaxOptions (options: Options): any {
   let HeadersConstructor = Headers
   const { headers, data, ...otherOptions } = options
+  const baseHeaders = {}
 
   if (typeof HeadersConstructor === 'undefined') {
     HeadersConstructor = ponyfill().Headers
   }
 
-  const baseHeaders = {}
   if (data) {
     baseHeaders['Content-Type'] = 'application/json'
   }
@@ -48,64 +48,56 @@ export function checkStatus (response: any): any {
   })
 }
 
-function ajax (url: string, options: Options): OptionsRequest {
-  let fetchMethod = fetch
-  let rejectPromise
-
-  if (options.method === 'GET' && options.data) {
-    url = `${url}?${qs.stringify(options.data, options.qsOptions)}`
-    delete options.data
-    delete options.qsOptions
-  }
-
-  if (typeof fetchMethod === 'undefined') {
-    fetchMethod = ponyfill().fetch
-  }
-
-  const xhr = fetchMethod(url, ajaxOptions(options))
-  const promise = new Promise((resolve, reject) => {
-    rejectPromise = reject
-    xhr.then(checkStatus).then(resolve, error => {
-      const ret = error ? error.errors : {}
-
-      return reject(ret || {})
-    })
-  })
-
-  const abort = () => rejectPromise('abort')
-
-  return { abort, promise }
+const methodsMapping = {
+  get: 'GET',
+  post: 'POST',
+  put: 'PUT',
+  patch: 'PATCH',
+  del: 'DELETE',
+  head: 'HEAD'
 }
 
-export default {
+const adapter = {
   apiPath: '',
   defaults: {},
 
-  get (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
-    return ajax(
-      `${this.apiPath}${path}`,
-      merge({ method: 'GET' }, this.defaults, options, { data })
-    )
-  },
+  request (method: string, path: string, options?: {} = {}): OptionsRequest {
+    let url = `${this.apiPath}${path}`
+    let fetchMethod = fetch
+    let rejectPromise
 
-  post (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
-    return ajax(
-      `${this.apiPath}${path}`,
-      merge({ method: 'POST' }, this.defaults, options, { data })
-    )
-  },
+    options = merge({}, this.defaults, { method }, options)
 
-  put (path: string, data: ?{}, options?: {} = {}): OptionsRequest {
-    return ajax(
-      `${this.apiPath}${path}`,
-      merge({ method: 'PUT' }, this.defaults, options, { data })
-    )
-  },
+    if (method === 'GET' && options.data) {
+      url = `${url}?${qs.stringify(options.data, options.qsOptions)}`
+      delete options.data
+      delete options.qsOptions
+    }
 
-  del (path: string, options?: {} = {}): OptionsRequest {
-    return ajax(
-      `${this.apiPath}${path}`,
-      merge({ method: 'DELETE' }, this.defaults, options)
-    )
+    if (typeof fetchMethod === 'undefined') {
+      fetchMethod = ponyfill().fetch
+    }
+
+    const xhr = fetchMethod(url, ajaxOptions(options))
+    const promise = new Promise((resolve, reject) => {
+      rejectPromise = reject
+      xhr.then(checkStatus).then(resolve, error => {
+        const ret = error ? error.errors : {}
+
+        return reject(ret || {})
+      })
+    })
+
+    const abort = () => rejectPromise('abort')
+
+    return { abort, promise }
   }
 }
+
+for (const method in methodsMapping) {
+  adapter[method] = function (path: string, options ?: {} = {}): OptionsRequest {
+    return this.request(methodsMapping[method], path, options)
+  }
+}
+
+export default adapter
