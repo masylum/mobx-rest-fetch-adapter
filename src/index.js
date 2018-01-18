@@ -3,21 +3,30 @@
 import qs from 'qs'
 import merge from 'lodash.merge'
 
-type OptionsRequest = {
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD'
+
+type AdapterRequest = {
   abort: () => void,
   promise: Promise<*>
 }
 
-type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-type Options = {
+type RequestOptions = {
   method: Method,
-  headers?: ?{ [key: string]: string },
-  onProgress?: (num: number) => mixed,
-  data?: ?{ [key: string]: mixed },
-  qs?: ?{ [key: mixed]: mixed }
+  headers?: { [string]: string },
+  data?: { [string]: mixed },
+  qs?: { [string]: mixed },
 }
 
-export function ajaxOptions (options: Options): any {
+type RequestResponse = {
+  ok: boolean,
+  json(): mixed
+}
+
+type RequestError = {
+  errors?: mixed
+}
+
+export function ajaxOptions (options: RequestOptions): any {
   const { headers, data, ...otherOptions } = options
   const baseHeaders = {}
 
@@ -36,7 +45,7 @@ export function ajaxOptions (options: Options): any {
   }
 }
 
-export function checkStatus (response: any): any {
+export function checkStatus (response: RequestResponse): Promise<*> {
   return response.ok ? Promise.resolve(response) : Promise.reject(response)
 }
 
@@ -53,26 +62,27 @@ const adapter = {
   urlRoot: '',
   defaults: {},
 
-  errorUnwrap: (error, _config) => {
+  errorUnwrap (error?: RequestError, _config: {}) {
     return (error ? error.errors : {}) || {}
   },
 
-  request (method: string, path: string, options?: {} = {}): OptionsRequest {
+  request (path: string, options: RequestOptions) {
     let url = `${this.urlRoot}${path}`
     let rejectPromise
 
-    options = merge({}, this.defaults, { method }, options)
+    options = merge({}, this.defaults, options)
 
     const finalOptions = { ...options }
 
-    if (method === 'GET' && options.data) {
+    if (options.method === 'GET' && options.data) {
       url = `${url}?${qs.stringify(options.data, options.qs)}`
+
       delete options.data
       delete options.qs
     }
 
     const xhr = fetch(url, ajaxOptions(options))
-    const promise = new Promise((resolve, reject) => {
+    const promise: Promise<*> = new Promise((resolve, reject) => {
       rejectPromise = reject
       xhr
         .then(checkStatus)
@@ -95,8 +105,8 @@ const adapter = {
 }
 
 for (const method in methodsMapping) {
-  adapter[method] = function (path: string, options ?: {} = {}): OptionsRequest {
-    return this.request(methodsMapping[method], path, options)
+  adapter[method] = function (path: string, options?: {}): AdapterRequest {
+    return this.request(path, merge({ method: methodsMapping[method] }, options))
   }
 }
 
