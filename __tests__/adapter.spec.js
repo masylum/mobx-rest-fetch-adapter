@@ -129,7 +129,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals.json).toEqual({})
+          expect(vals.error).toEqual({})
         })
       })
     })
@@ -141,7 +141,7 @@ describe('adapter', () => {
         const ret = adapter.get('/users')
 
         return ret.promise.catch(vals => {
-          expect(vals.response.status).toBe(404)
+          expect(vals.requestResponse.status).toBe(404)
         })
       })
     })
@@ -211,7 +211,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals.json).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -265,7 +265,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals.json).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -317,7 +317,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals.json).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -364,7 +364,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals.json).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })

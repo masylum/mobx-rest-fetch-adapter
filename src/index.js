@@ -91,8 +91,8 @@ const adapter = {
         .catch(response => {
           response.json().then(error => {
             reject({
-              response,
-              json: this.errorUnwrap(error, { options: finalOptions, path })
+              requestResponse: response,
+              error: this.errorUnwrap(error, { options: finalOptions, path })
             })
           })
         })
