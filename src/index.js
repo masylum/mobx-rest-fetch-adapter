@@ -101,12 +101,20 @@ const adapter = {
     const abort = () => rejectPromise('abort')
 
     return { abort, promise }
+  },
+
+  del (path: string, options?: {}): AdapterRequest {
+    return this.request(path, merge({ method: 'DELETE' }, options))
   }
 }
 
 for (const method in methodsMapping) {
-  adapter[method] = function (path: string, options?: {}): AdapterRequest {
-    return this.request(path, merge({ method: methodsMapping[method] }, options))
+  if (method === 'del') {
+    continue
+  }
+
+  adapter[method] = function (path: string, data?: {}, options?: {}): AdapterRequest {
+    return this.request(path, merge({ method: methodsMapping[method] }, options, { data }))
   }
 }
 

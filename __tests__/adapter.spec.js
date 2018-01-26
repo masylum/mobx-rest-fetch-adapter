@@ -39,7 +39,10 @@ function testDefaults (method) {
 
     injectDone({})
 
-    const args = ['/users', options]
+    const args = method === 'del'
+      ? ['/users', options]
+      : ['/users', {}, options]
+
     const request = adapter[method].apply(adapter, args)
 
     return request.promise.then(() => {
@@ -162,7 +165,7 @@ describe('adapter', () => {
       const data = { someArray: [1, 2, 3] }
       const qsOptions = { indices: false }
 
-      adapter.get('/users', { data, qs: qsOptions })
+      adapter.get('/users', data, { qs: qsOptions })
 
       expect(lastRequest().url.split('?')[1]).toEqual(qs.stringify(data, qsOptions))
     })
@@ -172,7 +175,7 @@ describe('adapter', () => {
     const data = { manager_id: 2 }
 
     const action = () => {
-      ret = adapter.get('/users', { data })
+      ret = adapter.get('/users', data)
     }
 
     testDefaults('get')
@@ -221,7 +224,7 @@ describe('adapter', () => {
     let data
 
     const action = () => {
-      ret = adapter.post('/users', { data })
+      ret = adapter.post('/users', data)
     }
 
     testDefaults('post')
@@ -275,7 +278,7 @@ describe('adapter', () => {
     const data = { name: 'paco' }
 
     const action = () => {
-      ret = adapter.put('/users', { data })
+      ret = adapter.put('/users', data)
     }
 
     testDefaults('put')
