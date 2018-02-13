@@ -77,6 +77,15 @@ describe('adapter', () => {
 
       expect(options.credentials).toEqual('same-origin')
     })
+
+    describe('if options.data is not specified', () => {
+      // https://github.com/github/fetch/issues/402
+      it('body should be undefined', () => {
+        const options = ajaxOptions({ data: null })
+
+        expect(options.body).toBeUndefined()
+      })
+    })
   })
 
   describe('checkStatus(response)', () => {

@@ -41,7 +41,7 @@ export function ajaxOptions (options: RequestOptions): any {
   return {
     ...otherOptions,
     headers: headersObject,
-    body: data ? JSON.stringify(data) : null
+    body: data ? JSON.stringify(data) : undefined
   }
 }
 
