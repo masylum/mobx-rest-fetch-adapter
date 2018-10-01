@@ -15,7 +15,7 @@ type Options = {
   headers?: ?{ [key: string]: string },
   onProgress?: (num: number) => mixed,
   data?: ?{ [key: string]: mixed },
-  errorCallBack: (mixed) => void
+  errorCallBack: mixed => void
 }
 
 export function ajaxOptions (options: Options): any {
@@ -66,10 +66,10 @@ function ajax (url: string, options: Options): OptionsRequest {
     rejectPromise = reject
     xhr.then(checkStatus).then(resolve, error => {
       const ret = error ? error.errors : {}
-      
-      if(options.errorCallBack !== undefined) {
-			// Call error function here
-			options.errorCallBack(ret);
+
+      if (options.errorCallBack !== undefined) {
+        // Call error function here
+        options.errorCallBack(ret)
       }
 
       return reject(ret || {})
