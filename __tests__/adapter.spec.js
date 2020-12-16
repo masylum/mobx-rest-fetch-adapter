@@ -1,7 +1,8 @@
 import adapter, { ajaxOptions, checkStatus } from '../src'
+import qs from 'qs'
 
 global.fetch = require('jest-fetch-mock')
-adapter.apiPath = '/api'
+adapter.urlRoot = '/api'
 
 let ret
 function lastRequest () {
@@ -18,13 +19,13 @@ function injectDone (values) {
   global.fetch.mockResponseOnce(JSON.stringify(values), { status: 200 })
 }
 
-function injectFail (values) {
-  global.fetch.mockResponseOnce(JSON.stringify(values), { status: 422 })
+function injectFail (values, status = 422) {
+  global.fetch.mockResponseOnce(JSON.stringify(values), { status })
 }
 
-function testCommonOptions (method) {
-  return it('deep merges the default `commonOptions` with the passed options', () => {
-    adapter.commonOptions = {
+function testDefaults (method) {
+  return it('deep merges the default `defaults` with the passed options', () => {
+    adapter.defaults = {
       headers: {
         'some-header': 'test1'
       }
@@ -38,8 +39,9 @@ function testCommonOptions (method) {
 
     injectDone({})
 
-    const args =
-      method === 'del' ? ['/users', options] : ['/users', null, options]
+    const args = method === 'del'
+      ? ['/users', options]
+      : ['/users', {}, options]
 
     const request = adapter[method].apply(adapter, args)
 
@@ -52,7 +54,7 @@ function testCommonOptions (method) {
 
 describe('adapter', () => {
   beforeEach(() => {
-    adapter.commonOptions = {}
+    adapter.defaults = {}
   })
 
   describe('ajaxOptions(options)', () => {
@@ -75,11 +77,20 @@ describe('adapter', () => {
 
       expect(options.credentials).toEqual('same-origin')
     })
+
+    describe('if options.data is not specified', () => {
+      // https://github.com/github/fetch/issues/402
+      it('body should be undefined', () => {
+        const options = ajaxOptions({ data: null })
+
+        expect(options.body).toBeUndefined()
+      })
+    })
   })
 
   describe('checkStatus(response)', () => {
     describe('if response is ok', () => {
-      it('returns a resolved promise with the parsed json', () => {
+      it('returns a resolved promise', () => {
         expect.assertions(1)
 
         const someData = { data: 'ok' }
@@ -88,14 +99,16 @@ describe('adapter', () => {
           json: () => Promise.resolve(someData)
         }
 
-        return checkStatus(response).then(json => {
-          expect(json).toEqual(someData)
+        return checkStatus(response).then(vals => {
+          return vals.json().then(response => {
+            expect(response).toEqual(someData)
+          })
         })
       })
     })
 
     describe('if response is not ok', () => {
-      it('returns a rejected promise with the parsed json', () => {
+      it('returns a rejected promise', () => {
         expect.assertions(1)
 
         const someData = { errors: { name: 'Already in use' } }
@@ -104,8 +117,10 @@ describe('adapter', () => {
           json: () => Promise.resolve(someData)
         }
 
-        return checkStatus(response).catch(json => {
-          expect(json).toEqual(someData)
+        return checkStatus(response).catch(vals => {
+          return vals.json().then(error => {
+            expect(error).toEqual(someData)
+          })
         })
       })
     })
@@ -126,7 +141,19 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual({})
+          expect(vals.error).toEqual({})
+        })
+      })
+    })
+
+    describe('when it fails', () => {
+      it('should allow to get the response status', () => {
+        injectFail({ errors: 'Not found' }, 404)
+
+        const ret = adapter.get('/users')
+
+        return ret.promise.catch(vals => {
+          expect(vals.requestResponse.status).toBe(404)
         })
       })
     })
@@ -142,6 +169,15 @@ describe('adapter', () => {
         })
       })
     })
+
+    it('should allow to pass options to qs.stringify', () => {
+      const data = { someArray: [1, 2, 3] }
+      const qsOptions = { indices: false }
+
+      adapter.get('/users', data, { qs: qsOptions })
+
+      expect(lastRequest().url.split('?')[1]).toEqual(qs.stringify(data, qsOptions))
+    })
   })
 
   describe('get', () => {
@@ -151,7 +187,7 @@ describe('adapter', () => {
       ret = adapter.get('/users', data)
     }
 
-    testCommonOptions('get')
+    testDefaults('get')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -187,7 +223,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -200,7 +236,7 @@ describe('adapter', () => {
       ret = adapter.post('/users', data)
     }
 
-    testCommonOptions('post')
+    testDefaults('post')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -241,7 +277,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -254,7 +290,7 @@ describe('adapter', () => {
       ret = adapter.put('/users', data)
     }
 
-    testCommonOptions('put')
+    testDefaults('put')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -293,7 +329,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
@@ -304,7 +340,7 @@ describe('adapter', () => {
       ret = adapter.del('/users')
     }
 
-    testCommonOptions('del')
+    testDefaults('del')
 
     describe('when it resolves', () => {
       const values = { id: 1, name: 'paco' }
@@ -340,7 +376,7 @@ describe('adapter', () => {
         expect(ret.abort).toBeTruthy()
 
         return ret.promise.catch(vals => {
-          expect(vals).toEqual(['foo'])
+          expect(vals.error).toEqual(['foo'])
         })
       })
     })
